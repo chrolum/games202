@@ -90,7 +90,21 @@ float findBlocker( sampler2D shadowMap,  vec2 uv, float zReceiver ) {
 }
 
 float PCF(sampler2D shadowMap, vec4 coords) {
-  return 1.0;
+  uniformDiskSamples(coords.xy);
+  float shadowDepth;
+  float z = coords.z;
+  float blockerCnt = 0;
+  for (int i = 0; i < NUM_SAMPLES; i++)
+  {
+    shadowDepth = unpack(texture2D(shadowMap, poissonDisk[i]));
+    if (z - shadowDepth < SHADOWEPS)
+    {
+      blockerCnt++;
+    }
+  }
+
+  float v = blockerCnt / 20.0;
+  return v;
 }
 
 float PCSS(sampler2D shadowMap, vec4 coords){
@@ -141,8 +155,8 @@ void main(void) {
   float visibility;
   // vec3 shadowCoord = (vPositionFromLight.xyz / vPositionFromLight.w);
   vec3 shadowCoord = vPositionFromLight.xyz / vPositionFromLight.w * 0.5 + 0.5;
-  visibility = useShadowMap(uShadowMap, vec4(shadowCoord, 1.0));
-  //visibility = PCF(uShadowMap, vec4(shadowCoord, 1.0));
+  // visibility = useShadowMap(uShadowMap, vec4(shadowCoord, 1.0));
+  visibility = PCF(uShadowMap, vec4(shadowCoord, 1.0));
   //visibility = PCSS(uShadowMap, vec4(shadowCoord, 1.0));
 
   vec3 phongColor = blinnPhong();
