@@ -15,6 +15,8 @@ class DirectionalLight {
         }
     }
 
+    //vec3 translate
+    //vec3 scale
     CalcLightMVP(translate, scale) {
         let lightMVP = mat4.create();
         let modelMatrix = mat4.create();
@@ -22,10 +24,15 @@ class DirectionalLight {
         let projectionMatrix = mat4.create();
 
         // Model transform
-
+        // mat4.identity(modelMatrix);
+        mat4.translate(modelMatrix, modelMatrix, translate);
+        mat4.scale(modelMatrix, modelMatrix, scale);
         // View transform
-    
+        mat4.lookAt(viewMatrix, this.lightPos, this.focalPoint, this.lightUp);
         // Projection transform
+        mat4.ortho(projectionMatrix, -100.0, 100.0, -100.0, 100.0, 0.3, 400.0);
+
+
 
         mat4.multiply(lightMVP, projectionMatrix, viewMatrix);
         mat4.multiply(lightMVP, lightMVP, modelMatrix);
