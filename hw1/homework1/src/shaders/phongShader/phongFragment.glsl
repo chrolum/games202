@@ -19,12 +19,14 @@ varying highp vec3 vNormal;
 #define BLOCKER_SEARCH_NUM_SAMPLES NUM_SAMPLES
 #define PCF_NUM_SAMPLES NUM_SAMPLES
 #define NUM_RINGS 10
+#define FILTER_SIZE 1
+#define SAMEPLE_SIZE 4 * (FILTER_SIZE + 1) * (FILTER_SIZE + 1)
 
 #define EPS 1e-3
 #define PI 3.141592653589793
 #define PI2 6.283185307179586
 
-#define SHADOWEPS 0.001
+#define SHADOWEPS 0.01
 
 uniform sampler2D uShadowMap;
 
@@ -90,21 +92,24 @@ float findBlocker( sampler2D shadowMap,  vec2 uv, float zReceiver ) {
 }
 
 float PCF(sampler2D shadowMap, vec4 coords) {
-  uniformDiskSamples(coords.xy);
+  //assert odd filtersize
+  poissonDiskSamples(coords.xy);
   float shadowDepth;
   float z = coords.z;
-  float blockerCnt = 0;
-  for (int i = 0; i < NUM_SAMPLES; i++)
+  int blockerCnt = 0;
+  vec2 texelSize = 1.0 / vec2(2048.0); //shadowmap size is defined in engine.js
+  float pcfDepth;
+
+  for(int x = -FILTER_SIZE; x <= FILTER_SIZE; x++)
   {
-    shadowDepth = unpack(texture2D(shadowMap, poissonDisk[i]));
-    if (z - shadowDepth < SHADOWEPS)
+    for(int y = -FILTER_SIZE; y <= FILTER_SIZE; y++)
     {
-      blockerCnt++;
+      pcfDepth = unpack(texture2D(shadowMap, coords.xy + vec2(x, y)*texelSize));
+      blockerCnt += (z-pcfDepth<SHADOWEPS) ? 1 : 0;
     }
   }
 
-  float v = blockerCnt / 20.0;
-  return v;
+  return float(blockerCnt) / float(SAMEPLE_SIZE);
 }
 
 float PCSS(sampler2D shadowMap, vec4 coords){
