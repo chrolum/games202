@@ -15,7 +15,7 @@ varying highp vec3 vFragPos;
 varying highp vec3 vNormal;
 
 // Shadow map related variables
-#define NUM_SAMPLES 100
+#define NUM_SAMPLES 70
 #define BLOCKER_SEARCH_NUM_SAMPLES NUM_SAMPLES
 #define PCF_NUM_SAMPLES NUM_SAMPLES
 #define NUM_RINGS 10
@@ -26,6 +26,7 @@ varying highp vec3 vNormal;
 #define BLOCKER_SEARCH_SIZR 2
 #define TEXEL_SIZE 2048.0
 #define BIAS 0.01
+
 
 #define EPS 1e-3
 #define PI 3.141592653589793

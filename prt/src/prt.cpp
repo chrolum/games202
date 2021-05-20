@@ -123,12 +123,34 @@ namespace ProjEnv
             {
                 for (int x = 0; x < width; x++)
                 {
-                    // TODO: here you need to compute light sh of each face of cubemap of each pixel
-                    // TODO: 此处你需要计算每个像素下cubemap某个面的球谐系数
+                    double weight;
+                    float u = x * width;
+                    float v = y * height;
+                    CalcArea(u, v, width, height);
+                    // FIXME: 此处你需要计算每个像素下cubemap某个面的球谐系数
                     Eigen::Vector3f dir = cubemapDirs[i * width * height + y * width + x];
                     int index = (y * width + x) * channel;
                     Eigen::Array3f Le(images[i][index + 0], images[i][index + 1],
-                                      images[i][index + 2]);
+                                      images[i][index + 2]);//rgb 三通道
+                    double theta, phi;
+                    double _x = dir[0];
+                    double _y = dir[1];
+                    double _z = dir[2];
+                    Eigen::Vector3d tmp(_x, _y, _z);
+                    sh::ToSphericalCoords(tmp, &phi, &theta);
+                    //comupte phi and theta
+
+
+                    double sh;
+                    for (int l = 0; l < SHOrder; l++)
+                    {
+                        for (int m = -l; m <= l; m++)
+                        {
+                            sh = sh::EvalSH(l, m, phi, theta);
+                            int sh_idx = sh::GetIndex(l, m);
+                            SHCoeffiecents[sh_idx] += sh * weight * Le;
+                        }
+                    }
                 }
             }
         }
@@ -206,10 +228,11 @@ public:
             auto shFunc = [&](double phi, double theta) -> double {
                 Eigen::Array3d d = sh::ToVector(phi, theta);
                 const auto wi = Vector3f(d.x(), d.y(), d.z());
+                float light_du;
                 if (m_Type == Type::Unshadowed)
                 {
-                    // TODO: here you need to calculate unshadowed transport term of a given direction
-                    // TODO: 此处你需要计算给定方向下的unshadowed传输项球谐函数值
+                    // TODO: 此处 你需要计算给定方向下的unshadowed传输项球谐函数值
+                     
                     return 0;
                 }
                 else
