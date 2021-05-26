@@ -61,7 +61,7 @@ function loadOBJ(renderer, path, name, objMaterial, transform) {
 									material = buildSkyBoxMaterial("./src/shaders/skyBoxShader/SkyBoxVertex.glsl", "./src/shaders/skyBoxShader/SkyBoxFragment.glsl");
 									break;
 								case 'PRTMaterial':
-									material = buildPRTMaterial(colorMap, mat.specular.toArray(), light, Translation, Scale,"./src/shaders/PRTShader/PRTVertexShader.glsl", "./src/shaders/PRTShader/PRTFragmentShader.glsl")
+									material = buildPRTMaterial(precomputeL, precomputeLT, "./src/shaders/PRTShader/PRTVertexShader.glsl", "./src/shaders/PRTShader/PRTFragmentShader.glsl");
 									break;
 							}
 
