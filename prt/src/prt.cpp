@@ -123,22 +123,23 @@ namespace ProjEnv
             {
                 for (int x = 0; x < width; x++)
                 {
-                    double weight;
-                    float u = x * width;
-                    float v = y * height;
-                    CalcArea(u, v, width, height);
-                    // FIXME: 此处你需要计算每个像素下cubemap某个面的球谐系数
+                    float u = x / (float)width;
+                    float v = y / (float)height;
                     Eigen::Vector3f dir = cubemapDirs[i * width * height + y * width + x];
                     int index = (y * width + x) * channel;
                     Eigen::Array3f Le(images[i][index + 0], images[i][index + 1],
                                       images[i][index + 2]);//rgb 三通道
+                    // Eigen::Array3f Le(1.0f, 1.0f, 1.0f);//rgb 三通道
+                                      
                     double theta, phi;
-                    double _x = dir[0];
-                    double _y = dir[1];
-                    double _z = dir[2];
-                    Eigen::Vector3d tmp(_x, _y, _z);
-                    sh::ToSphericalCoords(tmp, &phi, &theta);
-                    //comupte phi and theta
+
+                    Eigen::Vector3d tmp(dir.x(), dir.y(),dir.z());
+                    sh::ToSphericalCoords(tmp.normalized(), &phi, &theta);
+                    double pixel_area = CalcArea(u, v, width, height);
+                    //根据方向向量得出方向角的两个分量
+                    // double weight = pixel_area * sin(theta);
+                    double weight = pixel_area;
+                    //comupte phi and theta·
 
 
                     double sh;
@@ -231,15 +232,18 @@ public:
                 float light_du;
                 if (m_Type == Type::Unshadowed)
                 {
-                    // TODO: 此处 你需要计算给定方向下的unshadowed传输项球谐函数值
-                     
-                    return 0;
+                    return std::max(wi.dot(-n), 0.0f);
                 }
                 else
-                {
-                    // TODO: here you need to calculate shadowed transport term of a given direction
-                    // TODO: 此处你需要计算给定方向下的shadowed传输项球谐函数值
-                    return 0;
+                {   
+                    Ray3f ray(v, -wi);
+                    if (scene->rayIntersect(ray))
+                    {
+                        return 0;
+                    }
+                    
+                    // return visibility * std::max(wi.dot(n), 0.0f);
+                    return std::max(wi.dot(-n), 0.0f);
                 }
             };
             auto shCoeff = sh::ProjectFunction(SHOrder, shFunc, m_SampleCount);
@@ -295,13 +299,11 @@ public:
 
         const Vector3f &bary = its.bary;
         Color3f c = bary.x() * c0 + bary.y() * c1 + bary.z() * c2;
-        // TODO: you need to delete the following four line codes after finishing your calculation to SH,
-        //       we use it to visualize the normals of model for debug.
-        // TODO: 在完成了球谐系数计算后，你需要删除下列四行，这四行代码的作用是用来可视化模型法线
-        if (c.isZero()) {
-            auto n_ = its.shFrame.n.cwiseAbs();
-            return Color3f(n_.x(), n_.y(), n_.z());
-        }
+
+        // if (c.isZero()) {
+        //     auto n_ = its.shFrame.n.cwiseAbs();
+        //     return Color3f(n_.x(), n_.y(), n_.z());
+        // }
         return c;
     }
 
