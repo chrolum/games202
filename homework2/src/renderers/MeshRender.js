@@ -69,7 +69,8 @@ class MeshRender {
 				this.shader.program.attribs[this.mesh.verticesName]);
 		}
 
-		if (this.mesh.hasNormals) {
+		if (this.mesh.hasNormals &&
+			this.shader.program.attribs[this.mesh.normalsName] >= 0) {
 			const numComponents = 3;
 			const type = gl.FLOAT;
 			const normalize = false;
@@ -87,7 +88,8 @@ class MeshRender {
 				this.shader.program.attribs[this.mesh.normalsName]);
 		}
 
-		if (this.mesh.hasTexcoords) {
+		if (this.mesh.hasTexcoords &&
+			this.shader.program.attribs[this.mesh.texcoordsName] >= 0) {
 			const numComponents = 2;
 			const type = gl.FLOAT;
 			const normalize = false;
@@ -209,6 +211,14 @@ class MeshRender {
 			gl.enableVertexAttribArray(this.shader.program.attribs['aPrecomputeLT'] + ii);
 			gl.vertexAttribPointer(this.shader.program.attribs['aPrecomputeLT'] + ii, 3, gl.FLOAT, false, 36, ii * 12);
 		}
+
+		// Bind attribute mat3 - L
+		// const bufA = gl.createBuffer();
+		// gl.bindBuffer(gl.ARRAY_BUFFER, bufA);
+		// gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(precomputeL[guiParams.envmapId]), gl.STATIC_DRAW);
+		// gl.uniform3fv(new Float32Array(precomputeL[guiParams.envmapId]));
+
+		// gl.enableVertexAttribArray(this.shader.program.attribs['aPrecomputeL']);
 
 		// Bind geometry information
 		this.bindGeometryInfo();
