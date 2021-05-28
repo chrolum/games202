@@ -212,13 +212,6 @@ class MeshRender {
 			gl.vertexAttribPointer(this.shader.program.attribs['aPrecomputeLT'] + ii, 3, gl.FLOAT, false, 36, ii * 12);
 		}
 
-		// Bind attribute mat3 - L
-		// const bufA = gl.createBuffer();
-		// gl.bindBuffer(gl.ARRAY_BUFFER, bufA);
-		// gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(precomputeL[guiParams.envmapId]), gl.STATIC_DRAW);
-		// gl.uniform3fv(new Float32Array(precomputeL[guiParams.envmapId]));
-
-		// gl.enableVertexAttribArray(this.shader.program.attribs['aPrecomputeL']);
 
 		// Bind geometry information
 		this.bindGeometryInfo();

@@ -61,7 +61,16 @@ function loadOBJ(renderer, path, name, objMaterial, transform) {
 									material = buildSkyBoxMaterial("./src/shaders/skyBoxShader/SkyBoxVertex.glsl", "./src/shaders/skyBoxShader/SkyBoxFragment.glsl");
 									break;
 								case 'PRTMaterial':
-									material = buildPRTMaterial(precomputeL, precomputeLT, "./src/shaders/PRTShader/PRTVertexShader.glsl", "./src/shaders/PRTShader/PRTFragmentShader.glsl");
+									// flatten the arrays of vec3
+									var tmp = [];
+									for (i = 0; i < precomputeL[guiParams.envmapId].length; i++)
+									{
+										for (j = 0; j < 3; j++)
+										{
+											tmp.push(precomputeL[guiParams.envmapId][i][j]);
+										}
+									}
+									material = buildPRTMaterial(tmp, "./src/shaders/PRTShader/PRTVertexShader.glsl", "./src/shaders/PRTShader/PRTFragmentShader.glsl");
 									break;
 							}
 
